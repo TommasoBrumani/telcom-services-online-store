@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<link href="css/style.css" rel="stylesheet">
+<head>
+    <meta charset="UTF-8">
+    <title>Telco Service - Home</title>
+</head>
+<body>
+
+<div class="navbar">
+    <a class="active" href="GoToHomePage">Home</a>
+    <span th:if="${user != null}">
+        <a href="GoToSchedulePage">Activation Schedule</a>
+        <span th:if="${user.isEmployee()}">
+            <a href="GoToEmployeeHomePage">Employee Home</a>
+            <a href="GoToSalesReportPage">Sales Report</a>
+        </span>
+    </span>
+    <a href="GoToLoginPage">Login</a>
+    <span class="login-status" th:text="'Welcome, ' + (*{user != null}? *{user.username} : 'user')"></span>
+</div>
+
+<br>
+
+<div class="container">
+
+    <div th:if="${user != null && user.isInsolvent()}">
+        <h2>Rejected orders</h2>
+        <table>
+            <tr>
+                <th>Service Package Name</th>
+                <th>Creation date</th>
+                <th>Amount due</th>
+                <th>Payment</th>
+            </tr>
+            <tr th:each="order, iter : ${orders}" th:if="${order.isValid() == null || !order.isValid()}"
+                th:class="${iter.odd}? 'odd' : 'even'">
+                <td th:text="${order.servicePackage.name}"></td>
+                <td th:text="${order.creationTs}"></td>
+                <td th:text="${order.totalvalue} + ' euros'"></td>
+                <td><a th:href="'RetryOrder?order_id=' + ${order.id}">Pay now</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <h1>List of all service packages</h1>
+
+    <table>
+        <tr th:if="${#lists.isEmpty(servicePackages)}" style="color:red">There are currently no service packages
+            available
+        </tr>
+        <tr th:unless="${#lists.isEmpty(servicePackages)}">
+            <th>ID</th>
+            <th>Name</th>
+            <th>Services</th>
+            <th>Validity Periods</th>
+            <th>Optional Products</th>
+        </tr>
+        <tr th:each="servpckg, iter : ${servicePackages}" th:class="${iter.odd}? 'odd' : 'even'">
+            <td th:text="${servpckg.id}"></td>
+            <td th:text="${servpckg.name}"></td>
+            <td class="services">
+                <ul>
+                    <span th:if="${#sets.isEmpty(servpckg.services)}"
+                          style="color:red">This package has no services</span>
+                    <li th:unless="${#sets.isEmpty(servpckg.services)}" th:each="service : ${servpckg.services}">
+                        <span th:text="${service.type}"></span>
+                        <br>
+                        <span th:text="${service.getFeesString()}"></span>
+                    </li>
+                </ul>
+            </td>
+            <td class="validity-period">
+                <ul>
+                    <span th:if="${#sets.isEmpty(servpckg.validityPeriods)}" style="color:red">This package has no validity periods</span>
+                    <li th:each="validityPeriod : ${servpckg.validityPeriods}">
+                        <span th:text="'ID: ' + ${validityPeriod.id} + ' - Valid for ' + ${validityPeriod.months} + ' months at a cost of ' + ${validityPeriod.monthlyFee} + ' euros/month'"></span>
+                    </li>
+                </ul>
+            </td>
+            <td class="optional-product">
+                <ul>
+                    <span th:if="${#sets.isEmpty(servpckg.optionalProducts)}">This package has no optional products</span>
+                    <li th:each="optionalProduct : ${servpckg.optionalProducts}">
+                        <span>Product:</span><br>
+                        <span th:text="'ID: ' + ${optionalProduct.id} + ' - ' + ${optionalProduct.name} + ' - ' + ${optionalProduct.monthlyFee} + ' euros/month'"></span>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <br>
+
+    <form action="GoToBuyServicePage">
+        <input type="submit" value="Buy a service">
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<link href="css/style.css" rel="stylesheet">
+<head>
+    <title>Telco Service Company</title>
+</head>
+<body>
+<div class="navbar">
+    <a class="active" href="GoToHomePage">Home</a>
+    <span th:if="${user != null}">
+        <a href="GoToSchedulePage">Activation Schedule</a>
+        <span th:if="${user.isEmployee()}">
+            <a href="GoToEmployeeHomePage">Employee Home</a>
+            <a href="GoToSalesReportPage">Sales Report</a>
+        </span>
+    </span>
+    <span class="login-status" th:text="'Welcome, ' + (*{user != null}? *{user.username} : 'user')"></span>
+</div>
+
+<br>
+
+<div class="container">
+    <h1 th:if="${order == null}">Welcome to Telco Service!</h1>
+    <h2 th:text="${message}"></h2>
+    <form th:if="${order == null}" action="GoToHomePage">
+        <input type="submit" value="View products without logging in">
+    </form>
+    <br><br>
+    <form action="login"
+          method="POST">
+        <table class="login-table">
+            <tr>Sign in</tr>
+            <tr>
+                <td>Username:</td>
+                <td><label><input required type="text" name="username"></label></td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td><label><input required type="password" name="password"></label></td>
+            </tr>
+            <tr>
+                <td><input type="submit" value="Login"></td>
+            </tr>
+        </table>
+    </form>
+    <br><br>
+
+    <form action="register-new-user"
+          method="POST">
+        <table class="login-table">
+            <tr>New user? Sign up</tr>
+            <tr>
+                <td>Username</td>
+                <td><label><input required type="text" name="username"></label></td>
+            </tr>
+            <tr>
+                <td>Email:</td>
+                <td><label><input required type="text" name="email"></label></td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td><label><input required type="password" name="password"></label></td>
+            </tr>
+            <tr>
+                <td><input type="submit" value="Sign up"></td>
+            </tr>
+        </table>
+    </form>
+    <br>
+</div>
+</body>
+</html>

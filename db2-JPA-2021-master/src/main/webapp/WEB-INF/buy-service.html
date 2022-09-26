@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<link href="css/style.css" rel="stylesheet">
+<head>
+    <meta charset="UTF-8">
+    <title>Telco Service - Buy</title>
+</head>
+<body>
+<div class="navbar">
+    <a class="active" href="GoToHomePage">Home</a>
+    <span th:if="${user != null}">
+        <a href="GoToSchedulePage">Activation Schedule</a>
+        <span th:if="${user.isEmployee()}">
+            <a href="GoToEmployeeHomePage">Employee Home</a>
+            <a href="GoToSalesReportPage">Sales Report</a>
+        </span>
+    </span>
+    <a href="GoToLoginPage">Login</a>
+    <span class="login-status" th:text="'Welcome, ' + (*{user != null}? *{user.username} : 'user')"></span>
+</div>
+
+<br>
+
+<div class="container">
+    <h1>Buy a service package</h1>
+    <h3>Choose a service package and the related period:</h3>
+    <span th:if="${#lists.isEmpty(servicePackages)}">No service packages available</span>
+    <table>
+        <tr th:if="${#lists.isEmpty(servicePackages)}">There are currently no service packages available</tr>
+        <tr th:unless="${#lists.isEmpty(servicePackages)}">
+            <th>ID</th>
+            <th>Name</th>
+            <th>Services</th>
+            <th>Customize</th>
+        </tr>
+        <tr th:each="servpckg, iter : ${servicePackages}" th:class="${iter.odd}? 'odd' : 'even'">
+            <td th:text="${servpckg.id}"></td>
+            <td th:text="${servpckg.name}"></td>
+            <td class="services">
+                <ul>
+                    <div th:if="${#sets.isEmpty(servpckg.services)}" style="color:red">No services available</div>
+                    <li th:unless="${#sets.isEmpty(servpckg.services)}" th:each="service : ${servpckg.services}">
+                        <span th:text="${service.type}"></span>
+                        <br>
+                        <span th:text="${service.getFeesString()}"></span>
+                    </li>
+                </ul>
+            </td>
+            <td class="customize">
+                <form th:id="buy-form+${servpckg.id}" method="GET" action="PrepareOrder">
+                    <input type="hidden" name="serv_pckg_id" th:value="${servpckg.id}"
+                           th:form="buy-form+${servpckg.id}">
+                    <br>
+                    <div th:if="${#sets.isEmpty(servpckg.validityPeriods)}">
+                        <span style="color:red">No validity periods available</span>
+                    </div>
+                    <label th:unless="${#sets.isEmpty(servpckg.validityPeriods)}"
+                           th:for="validity-period+${servpckg.id}">Validity Period:
+                        <select th:id="validity-period+${servpckg.id}" name="val_per_id"
+                                th:form="buy-form+${servpckg.id}">
+                            <option th:each="valPer : ${servpckg.validityPeriods}" th:value="${valPer.id}"
+                                    th:text="'ID: ' + ${valPer.id} + ' - ' + ${valPer.months} + ' months - ' + ${valPer.monthlyFee} + ' euros/month'"
+                            ></option>
+                        </select>
+                        <br>
+                    </label>
+                    <br>
+                    <div th:if="${#sets.isEmpty(servpckg.optionalProducts)}">
+                        <span>No optional products available</span>
+                    </div>
+                    <div th:unless="${#sets.isEmpty(servpckg.optionalProducts)}">
+                        <span>Optional Products:</span>
+                        <br>
+                        <div th:each="optProd,iter : ${servpckg.optionalProducts}">
+                            <span style="text-align: justify">
+                                <label th:text="'ID: ' + ${optProd.id} + ' - ' + ${optProd.name} + ' - ' + ${optProd.monthlyFee} + ' euros/month'"></label>
+                                <input type="checkbox" th:name="opt_prod_id+${iter.index}" th:value="${optProd.id}"
+                                       th:form="buy-form+${servpckg.id}">
+                            </span>
+                        </div>
+                    </div>
+                    <br>
+                    <label>Start date
+                        <input required type="date" name="start-date" th:form="buy-form+${servpckg.id}">
+                    </label>
+                    <br>
+                    <input type="submit" th:form="buy-form+${servpckg.id}" value="BUY">
+                </form>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <form action="GoToHomePage" id="go-back" method="GET">
+        <input type="submit" value="Back">
+    </form>
+</div>
+</body>
+</html>
